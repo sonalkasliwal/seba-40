@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.concurrent.Executors;
@@ -56,7 +56,7 @@ public class IgmpStatisticsManager extends
                  AbstractListenerManager<IgmpStatisticsEvent, IgmpStatisticsEventListener>
                          implements IgmpStatisticsService {
     private IgmpStatisticsDelegate statsDelegate;
-    private final Logger log = getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private IgmpStatistics igmpStats;
 
     protected IgmpStatisticsEventPublisher igmpStatisticsPublisher;
@@ -146,6 +146,17 @@ public class IgmpStatisticsManager extends
             log.debug("--Igmpv3MembershipReport--" + igmpStats.getIgmpv3MembershipReport());
             log.debug("--InvalidIgmpMsgReceived--" + igmpStats.getInvalidIgmpMsgReceived());
             log.debug("--TotalMsgReceived--  " + igmpStats.getTotalMsgReceived());
+
+            log.debug("--UnknownIgmpTypePacketsRx--" + igmpStats.getUnknownIgmpTypePacketsRxCounter());
+            log.debug("--ReportsRxWithWrongMode--" + igmpStats.getReportsRxWithWrongModeCounter());
+            log.debug("--FailJoinReqInsuffPermission--" + igmpStats.getFailJoinReqInsuffPermissionAccessCounter());
+            log.debug("--FailJoinReqUnknownMulticastIp--" + igmpStats.getFailJoinReqUnknownMulticastIpCounter());
+            log.debug("--UnconfiguredGroupCounter--" + igmpStats.getUnconfiguredGroupCounter());
+            log.debug("--ValidIgmpPacketCounter--" + igmpStats.getValidIgmpPacketCounter());
+            log.debug("--IgmpChannelJoinCounter--" + igmpStats.getIgmpChannelJoinCounter());
+            log.debug("--CurrentGrpNumCounter--" + igmpStats.getCurrentGrpNumCounter());
+            log.debug("--IgmpValidChecksumCounter--" + igmpStats.getIgmpValidChecksumCounter());
+            log.debug("--InvalidIgmpLength--" + igmpStats.getInvalidIgmpLength());
             if (statsDelegate != null) {
                 statsDelegate.
                     notify(new IgmpStatisticsEvent(IgmpStatisticsEvent.Type.STATS_UPDATE, igmpStats));

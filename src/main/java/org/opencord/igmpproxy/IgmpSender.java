@@ -49,6 +49,7 @@ public final class IgmpSender {
     private static IgmpSender instance = null;
     private PacketService packetService;
     private MastershipService mastershipService;
+    private IgmpStatisticsService igmpStatisticsService;
     private boolean withRAUplink = true;
     private boolean withRADownlink = false;
     private short mvlan = DEFAULT_MVLAN;
@@ -56,13 +57,14 @@ public final class IgmpSender {
     private int maxResp = DEFAULT_MEX_RESP;
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private IgmpSender(PacketService packetService, MastershipService mastershipService) {
+    private IgmpSender(PacketService packetService, MastershipService mastershipService, IgmpStatisticsService igmpStatisticsService) {
         this.packetService = packetService;
         this.mastershipService = mastershipService;
+        this.igmpStatisticsService = igmpStatisticsService;
     }
 
-    public static void init(PacketService packetService, MastershipService mastershipService) {
-        instance = new IgmpSender(packetService, mastershipService);
+    public static void init(PacketService packetService, MastershipService mastershipService, IgmpStatisticsService igmpStatisticsService) {
+        instance = new IgmpSender(packetService, mastershipService, igmpStatisticsService);
     }
 
     public static IgmpSender getInstance() {
@@ -216,11 +218,18 @@ public final class IgmpSender {
             return;
         }
 
+        IPv4 ipv4Pkt = (IPv4) ethPkt.getPayload();
+        IGMP igmp = (IGMP) ipv4Pkt.getPayload();
+        if ( igmp.serialize().length < 8) {
+        	igmpStatisticsService.getIgmpStats().increaseInvalidIgmpLength();
+        }
         TrafficTreatment treatment = DefaultTrafficTreatment.builder()
                 .setOutput(portNumber).build();
         OutboundPacket packet = new DefaultOutboundPacket(deviceId,
                 treatment, ByteBuffer.wrap(ethPkt.serialize()));
+        igmpStatisticsService.getIgmpStats().increaseValidIgmpPacketCounter();
         packetService.emit(packet);
 
     }
+
 }
